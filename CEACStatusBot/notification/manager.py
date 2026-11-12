@@ -86,15 +86,14 @@ class NotificationManager:
     def __send_notifications(self, res: dict) -> None:
         if res["status"] == "Refused":
             try:
-                TIMEZONE = os.environ["TIMEZONE"]
-                localTimeZone = pytz.timezone(TIMEZONE)
-                localTime = datetime.datetime.now(localTimeZone)
+                localTimeZone = pytz.timezone(os.environ["TIMEZONE"])
             except pytz.exceptions.UnknownTimeZoneError:
-                print("UNKNOWN TIMEZONE Error, use default")
-                localTime = datetime.datetime.now()
+                print("UNKNOWN TIMEZONE Error, fall back to UTC")
+                localTimeZone = pytz.utc
             except KeyError:
-                print("TIMEZONE Error")
-                localTime = datetime.datetime.now()
+                print("TIMEZONE not set, fall back to UTC")
+                localTimeZone = pytz.utc
+            localTime = datetime.datetime.now(localTimeZone)
 
             active_hour_start, active_hour_end = self._get_hour_range()
             start_dt = datetime.datetime.combine(localTime.date(), active_hour_start, tzinfo=localTimeZone)
